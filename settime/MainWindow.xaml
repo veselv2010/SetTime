@@ -17,6 +17,8 @@
         <TextBox x:Name="msecondsBox" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Height="30" Margin="45,90,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="50" Grid.Column="1"/>
         <Button x:Name="secondsSubt" Click="secondsSubt_Click" Content="-" HorizontalAlignment="Left" Height="30" Margin="180,40,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1"/>
         <Button x:Name="msecondsSubt" Click="msecondsSubt_Click" Content="-" HorizontalAlignment="Left" Height="30" Margin="180,90,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1"/>
+        <Label x:Name="secondsLabel" Grid.ColumnSpan="2" Content="secs" HorizontalAlignment="Left" Margin="8,40,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="msecondsLabel" Grid.ColumnSpan="2" Content="msecs" HorizontalAlignment="Left" Margin="3,90,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

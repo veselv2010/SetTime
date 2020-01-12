@@ -91,7 +91,7 @@ namespace settime
                 GetSystemTime(ref st);
 
                 var mseconds = UInt16.Parse(msecondsBox.Text);
-                st.wMilliseconds = (ushort)(st.wMilliseconds - mseconds % 60);
+                st.wMilliseconds = (ushort)(st.wMilliseconds - mseconds % 60000);
 
                 SetSystemTime(ref st);
             }
