@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Windows.Threading;
+using System.Threading;
 
-namespace settime
+namespace SetTime
 {
     public partial class MainWindow : Window
     {
@@ -31,9 +21,60 @@ namespace settime
         [DllImport("kernel32.dll")]
         public extern static uint SetSystemTime(ref SYSTEMTIME lpSystemTime);
 
+        static Timer NTPTimer = null;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            NTPTimer = new Timer( new TimerCallback(NTPClock), null, 0, 500);
+
+            DispatcherTimer Lbltimer = new DispatcherTimer();
+            Lbltimer.Interval = TimeSpan.FromMilliseconds(100);
+            Lbltimer.Tick += Lbltimer_Tick;
+            Lbltimer.Start();
+        }
+
+        static DateTime currentNTP = NetworkTime.GetNetworkTime();
+        
+        TimeZoneInfo 
+        moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"),
+        eeuropeZone = TimeZoneInfo.FindSystemTimeZoneById("E. Europe Standard Time"),
+        GMT = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"),
+        currentZone;
+
+        public void TZcomboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            switch (TZcomboBox.SelectedIndex)
+            {
+                case 0:
+                    currentZone = GMT;
+                    break;
+
+                case 1:
+                    currentZone = moscowZone;
+                    break;
+
+                case 2:
+                    currentZone = eeuropeZone;
+                    break;
+            }
+            NetworkTime.GetNetworkTime();
+            currentNTP = NetworkTime.GetNetworkTime();
+            currentNTP = TimeZoneInfo.ConvertTimeFromUtc(currentNTP, currentZone);
+        }
+
+        static void NTPClock(object state)
+        {
+            currentNTP = currentNTP.AddMilliseconds(500);
+        }
+
+        public void Lbltimer_Tick(object sender, EventArgs e)
+        {
+            SystemTime.Content = DateTime.Now.ToString("HH:mm:ss:fff");
+            NTPTime.Content = currentNTP.ToString("HH:mm:ss:fff");
+            TimeSpan difference = DateTime.Now.Subtract(currentNTP);
+            Diff.Content = $"{difference.Seconds},{difference.Milliseconds}";
         }
 
         public void secondsAdd_Click(object sender, RoutedEventArgs e)
@@ -50,7 +91,6 @@ namespace settime
                 SetSystemTime(ref st);
                 }
         }
-
 
         public void msecondsAdd_Click(object sender, RoutedEventArgs e)
         {
@@ -95,6 +135,27 @@ namespace settime
 
                 SetSystemTime(ref st);
             }
+        }
+
+        private void RefreshBtn_Click(object sender, RoutedEventArgs e)
+        {
+            switch (TZcomboBox.SelectedIndex)
+            {
+                case 0:
+                    currentZone = GMT;
+                    break;
+
+                case 1:
+                    currentZone = moscowZone;
+                    break;
+
+                case 2:
+                    currentZone = eeuropeZone;
+                    break;
+            }
+            NetworkTime.GetNetworkTime();
+            currentNTP = NetworkTime.GetNetworkTime();
+            currentNTP = TimeZoneInfo.ConvertTimeFromUtc(currentNTP, currentZone);
         }
     }
 }
