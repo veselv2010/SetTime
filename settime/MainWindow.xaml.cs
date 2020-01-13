@@ -57,7 +57,7 @@ namespace settime
             var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
             if (isDigit == true)
             {
-                SYSTEMTIME st = new SYSTEMTIME();
+                var st = new SYSTEMTIME();
                 GetSystemTime(ref st);
 
                 var mseconds = UInt16.Parse(msecondsBox.Text);
@@ -72,7 +72,7 @@ namespace settime
             var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
             if (isDigit == true)
             {
-                SYSTEMTIME st = new SYSTEMTIME();
+                var st = new SYSTEMTIME();
                 GetSystemTime(ref st);
 
                 var seconds = UInt16.Parse(secondsBox.Text);
@@ -87,7 +87,7 @@ namespace settime
             var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
             if (isDigit == true)
             {
-                SYSTEMTIME st = new SYSTEMTIME();
+                var st = new SYSTEMTIME();
                 GetSystemTime(ref st);
 
                 var mseconds = UInt16.Parse(msecondsBox.Text);
