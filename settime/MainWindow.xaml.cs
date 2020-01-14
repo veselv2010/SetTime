@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using System.Threading;
@@ -9,101 +8,95 @@ namespace SetTime
 {
     public partial class MainWindow : Window
     {
-        public struct SYSTEMTIME
-        {
-            public ushort wYear, wMonth, wDayOfWeek, wDay,
-               wHour, wMinute, wSecond, wMilliseconds;
-        }
-
-        [DllImport("kernel32.dll")]
-        private extern static void GetSystemTime(ref SYSTEMTIME lpSystemTime);
-
-        [DllImport("kernel32.dll")]
-        private extern static uint SetSystemTime(ref SYSTEMTIME lpSystemTime);
-
+        Timer NtpTimer = null;
         public MainWindow()
         {
             InitializeComponent();
 
-            var NTPTimer = new Timer( new TimerCallback(NTPClock), null, 0, 500);
 
-            var Lbltimer = new DispatcherTimer();
-            Lbltimer.Interval = TimeSpan.FromMilliseconds(100);
+            NtpTimer = new Timer( new TimerCallback(NtpClock), null, 0, 500);
+
+            var Lbltimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(100)
+            };
             Lbltimer.Tick += Lbltimer_Tick;
             Lbltimer.Start();
         }
 
-        static DateTime currentNTP = NetworkTime.GetNetworkTime();
+        static DateTime CurrentNtp = NetworkTime.GetNetworkTime();
         
-        TimeZoneInfo 
-        moscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"),
-        eeuropeZone = TimeZoneInfo.FindSystemTimeZoneById("E. Europe Standard Time"),
-        GMT = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"),
-        currentZone;
+        private readonly TimeZoneInfo MoscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+        private readonly TimeZoneInfo EEuropeZone = TimeZoneInfo.FindSystemTimeZoneById("E. Europe Standard Time");
+        private readonly TimeZoneInfo Gmt = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+        private TimeZoneInfo CurrentZone;
 
         private void TZcomboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             switch (TZcomboBox.SelectedIndex)
             {
                 case 0:
-                    currentZone = GMT;
+                    CurrentZone = Gmt;
                     break;
 
                 case 1:
-                    currentZone = moscowZone;
+                    CurrentZone = MoscowZone;
                     break;
 
                 case 2:
-                    currentZone = eeuropeZone;
+                    CurrentZone = EEuropeZone;
                     break;
             }
+            
             NetworkTime.GetNetworkTime();
-            currentNTP = NetworkTime.GetNetworkTime();
-            currentNTP = TimeZoneInfo.ConvertTimeFromUtc(currentNTP, currentZone);
+            
+            CurrentNtp = NetworkTime.GetNetworkTime();
+            CurrentNtp = TimeZoneInfo.ConvertTimeFromUtc(CurrentNtp, CurrentZone);
         }
 
-        static void NTPClock(object state)
+        static void NtpClock(object state)
         {
-            currentNTP = currentNTP.AddMilliseconds(500);
+            CurrentNtp = CurrentNtp.AddMilliseconds(500);
         }
 
         private void Lbltimer_Tick(object sender, EventArgs e)
         {
             SystemTime.Content = DateTime.Now.ToString("HH:mm:ss:ff");
-            NTPTime.Content = currentNTP.ToString("HH:mm:ss:ff");
-            TimeSpan difference = DateTime.Now.Subtract(currentNTP);
+            NtpTime.Content = CurrentNtp.ToString("HH:mm:ss:ff");
+            
+            TimeSpan difference = DateTime.Now.Subtract(CurrentNtp);
             Diff.Content = $"{difference.Seconds},{difference.Milliseconds}";
         }
 
-        private void timeManipulation(string type, string operation)
+        private void TimeManipulation(string type, string operation)
         {
             if (type == "seconds")
             {
-                var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
+                var isDigit = Regex.IsMatch(SecondsBox.Text, @"^\d+$");
                 
                 if (isDigit == true)
                 {
                     
                     if (operation == "add")
                     {
-                        var st = new SYSTEMTIME();
-                        GetSystemTime(ref st);
+                        var st = new NativeMethods.SYSTEMTIME();
+                        NativeMethods.GetSystemTime(ref st);
 
-                        var seconds = UInt16.Parse(secondsBox.Text);
+                        var seconds = UInt16.Parse(SecondsBox.Text);
                         st.wSecond = (ushort)(st.wSecond + seconds % 60);
 
-                        SetSystemTime(ref st);
+                        NativeMethods.SetSystemTime(ref st);
                     }
                     
                     else if (operation == "subract")
                     {
-                        var st = new SYSTEMTIME();
-                        GetSystemTime(ref st);
+                        var st = new NativeMethods.SYSTEMTIME();
+                        NativeMethods.GetSystemTime(ref st);
 
-                        var seconds = UInt16.Parse(secondsBox.Text);
+                        var seconds = UInt16.Parse(SecondsBox.Text);
                         st.wSecond = (ushort)(st.wSecond - seconds % 60);
 
-                        SetSystemTime(ref st);
+                        NativeMethods.SetSystemTime(ref st);
 
                     }
                 }
@@ -112,30 +105,30 @@ namespace SetTime
             
             else if (type == "milliseconds")
             {
-                var isDigit = Regex.IsMatch(msecondsBox.Text, @"^\d+$");
+                var isDigit = Regex.IsMatch(MSecondsBox.Text, @"^\d+$");
                 
                 if (isDigit == true)
                 {
                     if (operation == "add")
                     {
-                        var st = new SYSTEMTIME();
-                        GetSystemTime(ref st);
+                        var st = new NativeMethods.SYSTEMTIME();
+                        NativeMethods.GetSystemTime(ref st);
 
-                        var mseconds = UInt16.Parse(msecondsBox.Text);
+                        var mseconds = UInt16.Parse(MSecondsBox.Text);
                         st.wMilliseconds = (ushort)(st.wMilliseconds + mseconds % 60000);
 
-                        SetSystemTime(ref st);
+                        NativeMethods.SetSystemTime(ref st);
                     }
                     
                     else if (operation == "subract")
                     {
-                        var st = new SYSTEMTIME();
-                        GetSystemTime(ref st);
+                        var st = new NativeMethods.SYSTEMTIME();
+                        NativeMethods.GetSystemTime(ref st);
 
-                        var mseconds = UInt16.Parse(msecondsBox.Text);
+                        var mseconds = UInt16.Parse(MSecondsBox.Text);
                         st.wMilliseconds = (ushort)(st.wMilliseconds - mseconds % 60000);
 
-                        SetSystemTime(ref st);
+                        NativeMethods.SetSystemTime(ref st);
 
                     }
 
@@ -143,24 +136,24 @@ namespace SetTime
             }
         }
 
-        private void secondsAdd_Click(object sender, RoutedEventArgs e)
+        private void SecondsAdd_Click(object sender, RoutedEventArgs e)
         {
-            timeManipulation("seconds", "add");
+            TimeManipulation("seconds", "add");
         }
 
-        private void msecondsAdd_Click(object sender, RoutedEventArgs e)
+        private void MSecondsAdd_Click(object sender, RoutedEventArgs e)
         {
-            timeManipulation("milliseconds", "add");
+            TimeManipulation("milliseconds", "add");
         }
 
-        private void secondsSubt_Click(object sender, RoutedEventArgs e)
+        private void SecondsSubt_Click(object sender, RoutedEventArgs e)
         {
-            timeManipulation("seconds", "subract");
+            TimeManipulation("seconds", "subract");
         }
 
-        private void msecondsSubt_Click(object sender, RoutedEventArgs e)
+        private void MSecondsSubt_Click(object sender, RoutedEventArgs e)
         {
-            timeManipulation("milliseconds", "subract");
+            TimeManipulation("milliseconds", "subract");
         }
 
         private void RefreshBtn_Click(object sender, RoutedEventArgs e)
@@ -168,20 +161,21 @@ namespace SetTime
             switch (TZcomboBox.SelectedIndex)
             {
                 case 0:
-                    currentZone = GMT;
+                    CurrentZone = Gmt;
                     break;
 
                 case 1:
-                    currentZone = moscowZone;
+                    CurrentZone = MoscowZone;
                     break;
 
                 case 2:
-                    currentZone = eeuropeZone;
+                    CurrentZone = EEuropeZone;
                     break;
             }
             NetworkTime.GetNetworkTime();
-            currentNTP = NetworkTime.GetNetworkTime();
-            currentNTP = TimeZoneInfo.ConvertTimeFromUtc(currentNTP, currentZone);
+            
+            CurrentNtp = NetworkTime.GetNetworkTime();
+            CurrentNtp = TimeZoneInfo.ConvertTimeFromUtc(CurrentNtp, CurrentZone);
         }
     }
 }

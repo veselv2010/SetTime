@@ -15,18 +15,18 @@
             <ColumnDefinition Width="0*"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="secondsBox" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Height="30" Margin="45,78,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="50" Grid.Column="1" Grid.RowSpan="2"/>
-        <Button x:Name="secondsAdd" Click="secondsAdd_Click" Content="+" HorizontalAlignment="Left" Height="30" Margin="130,78,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1" Grid.RowSpan="2"/>
-        <Button x:Name="msecondsAdd" Click="msecondsAdd_Click" Content="+" HorizontalAlignment="Left" Height="30" Margin="130,34.333,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1" Grid.Row="1"/>
-        <TextBox x:Name="msecondsBox" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Height="30" Margin="45,34.333,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="50" Grid.Column="1" Grid.Row="1"/>
-        <Button x:Name="secondsSubt" Click="secondsSubt_Click" Content="-" HorizontalAlignment="Left" Height="30" Margin="180,78,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1" Grid.RowSpan="2"/>
-        <Button x:Name="msecondsSubt" Click="msecondsSubt_Click" Content="-" HorizontalAlignment="Left" Height="30" Margin="180,34.333,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1" Grid.Row="1"/>
+        <TextBox x:Name="SecondsBox" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Height="30" Margin="45,78,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="50" Grid.Column="1" Grid.RowSpan="2"/>
+        <Button x:Name="secondsAdd" Click="SecondsAdd_Click" Content="+" HorizontalAlignment="Left" Height="30" Margin="130,78,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1" Grid.RowSpan="2"/>
+        <Button x:Name="msecondsAdd" Click="MSecondsAdd_Click" Content="+" HorizontalAlignment="Left" Height="30" Margin="130,34.333,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1" Grid.Row="1"/>
+        <TextBox x:Name="MSecondsBox" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Height="30" Margin="45,34.333,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="50" Grid.Column="1" Grid.Row="1"/>
+        <Button x:Name="secondsSubt" Click="SecondsSubt_Click" Content="-" HorizontalAlignment="Left" Height="30" Margin="180,78,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1" Grid.RowSpan="2"/>
+        <Button x:Name="msecondsSubt" Click="MSecondsSubt_Click" Content="-" HorizontalAlignment="Left" Height="30" Margin="180,34.333,0,0" VerticalAlignment="Top" Width="30" Grid.Column="1" Grid.Row="1"/>
         <Label x:Name="secondsLabel" Grid.ColumnSpan="2" Content="secs" HorizontalAlignment="Left" Margin="8,78,0,0" VerticalAlignment="Top" Grid.RowSpan="2"/>
         <Label x:Name="msecondsLabel" Grid.ColumnSpan="2" Content="msecs" HorizontalAlignment="Left" Margin="3,34.333,0,0" VerticalAlignment="Top" Grid.Row="1"/>
         <Label x:Name="SystemTimeLbl" Content="System Time:" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,21,0,0" VerticalAlignment="Top"/>
         <Label x:Name="NTPTimeLbl" Content="NTP Time:" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,47,0,0" VerticalAlignment="Top"/>
         <Label x:Name="SystemTime" Content="SystemTime" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="88,21,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="NTPTime" Content="NTPTime" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="88,47,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="NtpTime" Content="NTPTime" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="88,47,0,0" VerticalAlignment="Top"/>
         <Label x:Name="DiffLbl" Content="Difference:" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="166,34,0,0" VerticalAlignment="Top"/>
         <Label x:Name="Diff" Content="Difference" HorizontalContentAlignment="Center" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="233,34,0,0" VerticalAlignment="Top"/>
         <Button x:Name="RefreshBtn" Grid.ColumnSpan="2" Click="RefreshBtn_Click" Content="NTP Refresh" HorizontalAlignment="Left" Margin="218,14,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="20"/>
