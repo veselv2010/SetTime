@@ -16,20 +16,18 @@ namespace SetTime
         }
 
         [DllImport("kernel32.dll")]
-        public extern static void GetSystemTime(ref SYSTEMTIME lpSystemTime);
+        private extern static void GetSystemTime(ref SYSTEMTIME lpSystemTime);
 
         [DllImport("kernel32.dll")]
-        public extern static uint SetSystemTime(ref SYSTEMTIME lpSystemTime);
-
-        static Timer NTPTimer = null;
+        private extern static uint SetSystemTime(ref SYSTEMTIME lpSystemTime);
 
         public MainWindow()
         {
             InitializeComponent();
 
-            NTPTimer = new Timer( new TimerCallback(NTPClock), null, 0, 500);
+            var NTPTimer = new Timer( new TimerCallback(NTPClock), null, 0, 500);
 
-            DispatcherTimer Lbltimer = new DispatcherTimer();
+            var Lbltimer = new DispatcherTimer();
             Lbltimer.Interval = TimeSpan.FromMilliseconds(100);
             Lbltimer.Tick += Lbltimer_Tick;
             Lbltimer.Start();
@@ -43,7 +41,7 @@ namespace SetTime
         GMT = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"),
         currentZone;
 
-        public void TZcomboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void TZcomboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             switch (TZcomboBox.SelectedIndex)
             {
@@ -69,72 +67,100 @@ namespace SetTime
             currentNTP = currentNTP.AddMilliseconds(500);
         }
 
-        public void Lbltimer_Tick(object sender, EventArgs e)
+        private void Lbltimer_Tick(object sender, EventArgs e)
         {
-            SystemTime.Content = DateTime.Now.ToString("HH:mm:ss:fff");
-            NTPTime.Content = currentNTP.ToString("HH:mm:ss:fff");
+            SystemTime.Content = DateTime.Now.ToString("HH:mm:ss:ff");
+            NTPTime.Content = currentNTP.ToString("HH:mm:ss:ff");
             TimeSpan difference = DateTime.Now.Subtract(currentNTP);
             Diff.Content = $"{difference.Seconds},{difference.Milliseconds}";
         }
 
-        public void secondsAdd_Click(object sender, RoutedEventArgs e)
+        private void timeManipulation(string type, string operation)
         {
-            var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
-            if (isDigit == true)
+            if (type == "seconds")
+            {
+                var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
+                
+                if (isDigit == true)
                 {
-                var st = new SYSTEMTIME();
-                GetSystemTime(ref st);
+                    
+                    if (operation == "add")
+                    {
+                        var st = new SYSTEMTIME();
+                        GetSystemTime(ref st);
 
-                var seconds = UInt16.Parse(secondsBox.Text);
-                st.wSecond = (ushort)(st.wSecond + seconds % 60);
+                        var seconds = UInt16.Parse(secondsBox.Text);
+                        st.wSecond = (ushort)(st.wSecond + seconds % 60);
 
-                SetSystemTime(ref st);
+                        SetSystemTime(ref st);
+                    }
+                    
+                    else if (operation == "subract")
+                    {
+                        var st = new SYSTEMTIME();
+                        GetSystemTime(ref st);
+
+                        var seconds = UInt16.Parse(secondsBox.Text);
+                        st.wSecond = (ushort)(st.wSecond - seconds % 60);
+
+                        SetSystemTime(ref st);
+
+                    }
                 }
-        }
 
-        public void msecondsAdd_Click(object sender, RoutedEventArgs e)
-        {
-            var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
-            if (isDigit == true)
+            }
+            
+            else if (type == "milliseconds")
             {
-                var st = new SYSTEMTIME();
-                GetSystemTime(ref st);
+                var isDigit = Regex.IsMatch(msecondsBox.Text, @"^\d+$");
+                
+                if (isDigit == true)
+                {
+                    if (operation == "add")
+                    {
+                        var st = new SYSTEMTIME();
+                        GetSystemTime(ref st);
 
-                var mseconds = UInt16.Parse(msecondsBox.Text);
-                st.wMilliseconds = (ushort)(st.wMilliseconds + mseconds % 60000);
+                        var mseconds = UInt16.Parse(msecondsBox.Text);
+                        st.wMilliseconds = (ushort)(st.wMilliseconds + mseconds % 60000);
 
-                SetSystemTime(ref st);
+                        SetSystemTime(ref st);
+                    }
+                    
+                    else if (operation == "subract")
+                    {
+                        var st = new SYSTEMTIME();
+                        GetSystemTime(ref st);
+
+                        var mseconds = UInt16.Parse(msecondsBox.Text);
+                        st.wMilliseconds = (ushort)(st.wMilliseconds - mseconds % 60000);
+
+                        SetSystemTime(ref st);
+
+                    }
+
+                }
             }
         }
 
-        public void secondsSubt_Click(object sender, RoutedEventArgs e)
+        private void secondsAdd_Click(object sender, RoutedEventArgs e)
         {
-            var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
-            if (isDigit == true)
-            {
-                var st = new SYSTEMTIME();
-                GetSystemTime(ref st);
-
-                var seconds = UInt16.Parse(secondsBox.Text);
-                st.wSecond = (ushort)(st.wSecond - seconds % 60);
-
-                SetSystemTime(ref st);
-            }
+            timeManipulation("seconds", "add");
         }
 
-        public void msecondsSubt_Click(object sender, RoutedEventArgs e)
+        private void msecondsAdd_Click(object sender, RoutedEventArgs e)
         {
-            var isDigit = Regex.IsMatch(secondsBox.Text, @"^\d+$");
-            if (isDigit == true)
-            {
-                var st = new SYSTEMTIME();
-                GetSystemTime(ref st);
+            timeManipulation("milliseconds", "add");
+        }
 
-                var mseconds = UInt16.Parse(msecondsBox.Text);
-                st.wMilliseconds = (ushort)(st.wMilliseconds - mseconds % 60000);
+        private void secondsSubt_Click(object sender, RoutedEventArgs e)
+        {
+            timeManipulation("seconds", "subract");
+        }
 
-                SetSystemTime(ref st);
-            }
+        private void msecondsSubt_Click(object sender, RoutedEventArgs e)
+        {
+            timeManipulation("milliseconds", "subract");
         }
 
         private void RefreshBtn_Click(object sender, RoutedEventArgs e)

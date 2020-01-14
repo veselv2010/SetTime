@@ -8,7 +8,7 @@ namespace SetTime
     {
         public static DateTime GetNetworkTime()
         {
-            const string ntpServer = "3.ru.pool.ntp.org";
+            const string ntpServer = "pool.ntp.org";
 
             var ntpData = new byte[48];
 
