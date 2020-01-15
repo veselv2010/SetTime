@@ -4,11 +4,29 @@ using System.Net.Sockets;
 
 namespace SetTime
 {
-    class NetworkTime
+    internal class NetworkTime
     {
-        public static DateTime GetNetworkTime()
+        private DateTime _CurrentNtp;
+        public DateTime CurrentNtp
         {
-            const string ntpServer = "pool.ntp.org";
+            get
+            {
+                _CurrentNtp = GetNetworkTime();
+                return _CurrentNtp;
+            }
+            set
+            {
+                _CurrentNtp = value;
+            }
+        }
+        public NetworkTime()
+        {
+            CurrentNtp = GetNetworkTime();
+        }
+
+        public DateTime GetNetworkTime()
+        {
+            const string ntpServer = "3.pool.ntp.org";
 
             var ntpData = new byte[48];
 
@@ -43,12 +61,38 @@ namespace SetTime
             return networkDateTime;
         }
 
-        static uint SwapEndianness(ulong x)
+        private uint SwapEndianness(ulong x)
         {
             return (uint)(((x & 0x000000ff) << 24) +
                            ((x & 0x0000ff00) << 8) +
                            ((x & 0x00ff0000) >> 8) +
                            ((x & 0xff000000) >> 24));
+        }
+
+        public void TimeManipulation(string senderName, UInt16 parsedSec)
+        {
+            char operation = senderName[senderName.Length - 1];
+
+            var st = new NativeMethods.SYSTEMTIME();
+            NativeMethods.GetSystemTime(ref st);
+
+            if (senderName.StartsWith("s"))
+            {
+                switch (operation)
+                {
+                    case 'A': st.wSecond = (ushort)(st.wSecond + parsedSec % 60); break;
+                    case 'S': st.wSecond = (ushort)(st.wSecond - parsedSec % 60); break;
+                }
+            }
+            else
+            {
+                switch (operation)
+                {
+                    case 'A': st.wMilliseconds = (ushort)(st.wMilliseconds + parsedSec % 60000); break;
+                    case 'S': st.wMilliseconds = (ushort)(st.wMilliseconds - parsedSec % 60000); break;
+                }
+            }
+            NativeMethods.SetSystemTime(ref st);
         }
     }
 }

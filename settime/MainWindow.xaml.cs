@@ -9,123 +9,69 @@ namespace SetTime
 {
     public partial class MainWindow : Window
     {
-        Timer NtpTimer { get; set; }
+        private readonly TimeZoneInfo MoscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+        private readonly TimeZoneInfo EEuropeZone = TimeZoneInfo.FindSystemTimeZoneById("E. Europe Standard Time");
+        private readonly TimeZoneInfo Gmt = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
+        private TimeZoneInfo CurrentZone { get; set; }
+        private NetworkTime networkTime { get; set; }
         public MainWindow()
         {
             InitializeComponent();
 
-            NtpTimer = new Timer( new TimerCallback(NtpClock), null, 0, 500);
+            networkTime = new NetworkTime();
 
-            var Lbltimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(100)
-            };
-            Lbltimer.Tick += Lbltimer_Tick;
+            var NtpTimer = new Timer(NtpClock, null, 0, 500);
+            var Lbltimer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), 
+                DispatcherPriority.Normal, Lbltimer_Tick, Dispatcher);
             Lbltimer.Start();
         }
-
-        static DateTime CurrentNtp = NetworkTime.GetNetworkTime();
-        
-        private readonly TimeZoneInfo MoscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-        private readonly TimeZoneInfo EEuropeZone = TimeZoneInfo.FindSystemTimeZoneById("E. Europe Standard Time");
-        private readonly TimeZoneInfo Gmt = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-        private TimeZoneInfo CurrentZone;
-
-        private void TZcomboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    
+        private void TZcomboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             switch (TZcomboBox.SelectedIndex)
             {
-                case 0:
-                    CurrentZone = Gmt;
-                    break;
-
-                case 1:
-                    CurrentZone = MoscowZone;
-                    break;
-
-                case 2:
-                    CurrentZone = EEuropeZone;
-                    break;
-            }         
-            NetworkTime.GetNetworkTime();
+                case 0: CurrentZone = Gmt; break;
+                case 1: CurrentZone = MoscowZone; break;
+                case 2: CurrentZone = EEuropeZone; break;
+            }
             
-            CurrentNtp = NetworkTime.GetNetworkTime();
-            CurrentNtp = TimeZoneInfo.ConvertTimeFromUtc(CurrentNtp, CurrentZone);
+            TimeZoneInfo.ConvertTimeFromUtc(networkTime.CurrentNtp, CurrentZone);
         }
 
-        static void NtpClock(object state) => CurrentNtp = CurrentNtp.AddMilliseconds(500);
+        private void NtpClock(object state) => networkTime.CurrentNtp.AddMilliseconds(500);
 
         private void Lbltimer_Tick(object sender, EventArgs e)
         {
             SystemTime.Content = DateTime.Now.ToString("HH:mm:ss:ff");
-            NtpTime.Content = CurrentNtp.ToString("HH:mm:ss:ff");
+            NtpTime.Content = networkTime.CurrentNtp.ToString("HH:mm:ss:ff");
             
-            TimeSpan difference = DateTime.Now.Subtract(CurrentNtp);
+            TimeSpan difference = DateTime.Now.Subtract(networkTime.CurrentNtp);
             Diff.Content = $"{difference.Seconds},{difference.Milliseconds}";
         }
 
-        private void TimeManipulation(string senderName)
+        private void TimeManipulation_Click(object sender, RoutedEventArgs e)
         {
-            char operation = senderName[senderName.Length - 1];
+            string senderName = (sender as Button).Name;
             string textBoxName = senderName[0] == 's' ? "seconds" : "mseconds";
             var tempBox = FindName(textBoxName) as TextBox;
             var isDigit = Regex.IsMatch(tempBox.Text, @"^\d+$");
 
             if (isDigit == true)
             {
-                var st = new NativeMethods.SYSTEMTIME();
-                NativeMethods.GetSystemTime(ref st);
-
-                var sec = UInt16.Parse(tempBox.Text);
-
-                if (senderName.StartsWith("s"))
-                {
-                    switch (operation)
-                    {
-                        case 'A': st.wSecond = (ushort)(st.wSecond + sec % 60); break;
-                        case 'S': st.wSecond = (ushort)(st.wSecond - sec % 60); break;
-                    };
-                }
-                else
-                {
-                    switch (operation)
-                    {
-                        case 'A': st.wMilliseconds = (ushort)(st.wMilliseconds + sec % 60000); break;
-                        case 'S': st.wMilliseconds = (ushort)(st.wMilliseconds - sec % 60000); break;
-                    };
-                }
-                NativeMethods.SetSystemTime(ref st);
+                UInt16 sec = UInt16.Parse(tempBox.Text);
+                networkTime.TimeManipulation(senderName, sec);
             }
-            else
-                return;           
-        }
-
-        private void TimeManipulation_Click(object sender, RoutedEventArgs e)
-        {
-            string senderName = (sender as Button).Name;
-            TimeManipulation(senderName);
         }
 
         private void RefreshBtn_Click(object sender, RoutedEventArgs e)
         {
             switch (TZcomboBox.SelectedIndex)
             {
-                case 0:
-                    CurrentZone = Gmt;
-                    break;
-
-                case 1:
-                    CurrentZone = MoscowZone;
-                    break;
-
-                case 2:
-                    CurrentZone = EEuropeZone;
-                    break;
-            }
-            NetworkTime.GetNetworkTime();
-            
-            CurrentNtp = NetworkTime.GetNetworkTime();
-            CurrentNtp = TimeZoneInfo.ConvertTimeFromUtc(CurrentNtp, CurrentZone);
+                case 0: CurrentZone = Gmt; break;
+                case 1: CurrentZone = MoscowZone; break;
+                case 2: CurrentZone = EEuropeZone; break;
+            }          
+            TimeZoneInfo.ConvertTimeFromUtc(networkTime.CurrentNtp, CurrentZone);
         }
     }
 }
