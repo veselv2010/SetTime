@@ -3,16 +3,16 @@ using System.Windows;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using System.Threading;
+using System.Windows.Controls;
 
 namespace SetTime
 {
     public partial class MainWindow : Window
     {
-        Timer NtpTimer = null;
+        Timer NtpTimer { get; set; }
         public MainWindow()
         {
             InitializeComponent();
-
 
             NtpTimer = new Timer( new TimerCallback(NtpClock), null, 0, 500);
 
@@ -46,18 +46,14 @@ namespace SetTime
                 case 2:
                     CurrentZone = EEuropeZone;
                     break;
-            }
-            
+            }         
             NetworkTime.GetNetworkTime();
             
             CurrentNtp = NetworkTime.GetNetworkTime();
             CurrentNtp = TimeZoneInfo.ConvertTimeFromUtc(CurrentNtp, CurrentZone);
         }
 
-        static void NtpClock(object state)
-        {
-            CurrentNtp = CurrentNtp.AddMilliseconds(500);
-        }
+        static void NtpClock(object state) => CurrentNtp = CurrentNtp.AddMilliseconds(500);
 
         private void Lbltimer_Tick(object sender, EventArgs e)
         {
@@ -68,92 +64,47 @@ namespace SetTime
             Diff.Content = $"{difference.Seconds},{difference.Milliseconds}";
         }
 
-        private void TimeManipulation(string type, string operation)
+        private void TimeManipulation(string senderName)
         {
-            if (type == "seconds")
+            char operation = senderName[senderName.Length - 1];
+            string textBoxName = senderName[0] == 's' ? "seconds" : "mseconds";
+            var tempBox = FindName(textBoxName) as TextBox;
+            var isDigit = Regex.IsMatch(tempBox.Text, @"^\d+$");
+
+            if (isDigit == true)
             {
-                var isDigit = Regex.IsMatch(SecondsBox.Text, @"^\d+$");
-                
-                if (isDigit == true)
+                var st = new NativeMethods.SYSTEMTIME();
+                NativeMethods.GetSystemTime(ref st);
+
+                var sec = UInt16.Parse(tempBox.Text);
+
+                if (senderName.StartsWith("s"))
                 {
-                    
-                    if (operation == "add")
+                    switch (operation)
                     {
-                        var st = new NativeMethods.SYSTEMTIME();
-                        NativeMethods.GetSystemTime(ref st);
-
-                        var seconds = UInt16.Parse(SecondsBox.Text);
-                        st.wSecond = (ushort)(st.wSecond + seconds % 60);
-
-                        NativeMethods.SetSystemTime(ref st);
-                    }
-                    
-                    else if (operation == "subract")
-                    {
-                        var st = new NativeMethods.SYSTEMTIME();
-                        NativeMethods.GetSystemTime(ref st);
-
-                        var seconds = UInt16.Parse(SecondsBox.Text);
-                        st.wSecond = (ushort)(st.wSecond - seconds % 60);
-
-                        NativeMethods.SetSystemTime(ref st);
-
-                    }
+                        case 'A': st.wSecond = (ushort)(st.wSecond + sec % 60);break;
+                        case 'S': st.wSecond = (ushort)(st.wSecond - sec % 60);break;
+                    };
                 }
-
-            }
-            
-            else if (type == "milliseconds")
-            {
-                var isDigit = Regex.IsMatch(MSecondsBox.Text, @"^\d+$");
-                
-                if (isDigit == true)
+                else
                 {
-                    if (operation == "add")
+                    switch (operation)
                     {
-                        var st = new NativeMethods.SYSTEMTIME();
-                        NativeMethods.GetSystemTime(ref st);
-
-                        var mseconds = UInt16.Parse(MSecondsBox.Text);
-                        st.wMilliseconds = (ushort)(st.wMilliseconds + mseconds % 60000);
-
-                        NativeMethods.SetSystemTime(ref st);
-                    }
-                    
-                    else if (operation == "subract")
-                    {
-                        var st = new NativeMethods.SYSTEMTIME();
-                        NativeMethods.GetSystemTime(ref st);
-
-                        var mseconds = UInt16.Parse(MSecondsBox.Text);
-                        st.wMilliseconds = (ushort)(st.wMilliseconds - mseconds % 60000);
-
-                        NativeMethods.SetSystemTime(ref st);
-
-                    }
-
+                        case 'A': st.wMilliseconds = (ushort)(st.wMilliseconds + sec % 60000); break;
+                        case 'S': st.wMilliseconds = (ushort)(st.wMilliseconds - sec % 60000); break;
+                    };
                 }
+                NativeMethods.SetSystemTime(ref st);
             }
+            else
+                return;           
         }
 
-        private void SecondsAdd_Click(object sender, RoutedEventArgs e)
+        private void TimeManipulation_Click(object sender, RoutedEventArgs e)
         {
-            TimeManipulation("seconds", "add");
-        }
-
-        private void MSecondsAdd_Click(object sender, RoutedEventArgs e)
-        {
-            TimeManipulation("milliseconds", "add");
-        }
-
-        private void SecondsSubt_Click(object sender, RoutedEventArgs e)
-        {
-            TimeManipulation("seconds", "subract");
-        }
-
-        private void MSecondsSubt_Click(object sender, RoutedEventArgs e)
-        {
-            TimeManipulation("milliseconds", "subract");
+            string senderName = (sender as DependencyObject)
+                .GetValue(NameProperty).ToString();
+            TimeManipulation(senderName);
         }
 
         private void RefreshBtn_Click(object sender, RoutedEventArgs e)
