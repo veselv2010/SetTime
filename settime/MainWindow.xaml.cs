@@ -82,8 +82,8 @@ namespace SetTime
                 {
                     switch (operation)
                     {
-                        case 'A': st.wSecond = (ushort)(st.wSecond + sec % 60);break;
-                        case 'S': st.wSecond = (ushort)(st.wSecond - sec % 60);break;
+                        case 'A': st.wSecond = (ushort)(st.wSecond + sec % 60); break;
+                        case 'S': st.wSecond = (ushort)(st.wSecond - sec % 60); break;
                     };
                 }
                 else
@@ -102,8 +102,7 @@ namespace SetTime
 
         private void TimeManipulation_Click(object sender, RoutedEventArgs e)
         {
-            string senderName = (sender as DependencyObject)
-                .GetValue(NameProperty).ToString();
+            string senderName = (sender as Button).Name;
             TimeManipulation(senderName);
         }
 
