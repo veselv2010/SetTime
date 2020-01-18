@@ -9,11 +9,15 @@ namespace SetTime
 {
     public partial class MainWindow : Window
     {
-        private readonly TimeZoneInfo MoscowZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
-        private readonly TimeZoneInfo EEuropeZone = TimeZoneInfo.FindSystemTimeZoneById("E. Europe Standard Time");
-        private readonly TimeZoneInfo Gmt = TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time");
-        private TimeZoneInfo CurrentZone { get; set; }
-        private NetworkTime networkTime { get; set; }
+        private TimeZoneInfo CurrentZone
+        {
+            get
+            {
+                var timeZone = (ComboBoxItem)TZcomboBox.SelectedItem;
+                return TimeZoneInfo.FindSystemTimeZoneById(timeZone.Content.ToString());
+            }
+        }
+        private NetworkTime networkTime { get; }
         public MainWindow()
         {
             InitializeComponent();
@@ -21,21 +25,9 @@ namespace SetTime
             networkTime = new NetworkTime();
 
             var NtpTimer = new Timer(NtpClock, null, 0, 500);
-            var Lbltimer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), 
+            var Lbltimer = new DispatcherTimer(TimeSpan.FromMilliseconds(300),
                 DispatcherPriority.Normal, Lbltimer_Tick, Dispatcher);
             Lbltimer.Start();
-        }
-    
-        private void TZcomboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            switch (TZcomboBox.SelectedIndex)
-            {
-                case 0: CurrentZone = Gmt; break;
-                case 1: CurrentZone = MoscowZone; break;
-                case 2: CurrentZone = EEuropeZone; break;
-            }
-            
-            TimeZoneInfo.ConvertTimeFromUtc(networkTime.CurrentNtp, CurrentZone);
         }
 
         private void NtpClock(object state) => networkTime.CurrentNtp.AddMilliseconds(500);
@@ -65,13 +57,8 @@ namespace SetTime
 
         private void RefreshBtn_Click(object sender, RoutedEventArgs e)
         {
-            switch (TZcomboBox.SelectedIndex)
-            {
-                case 0: CurrentZone = Gmt; break;
-                case 1: CurrentZone = MoscowZone; break;
-                case 2: CurrentZone = EEuropeZone; break;
-            }          
-            TimeZoneInfo.ConvertTimeFromUtc(networkTime.CurrentNtp, CurrentZone);
+            networkTime.GetNetworkTime();
+            networkTime.CurrentNtp = TimeZoneInfo.ConvertTimeFromUtc(networkTime.CurrentNtp, CurrentZone);
         }
     }
 }

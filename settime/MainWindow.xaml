@@ -26,20 +26,14 @@
         <Label x:Name="SystemTimeLbl" Content="System Time:" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,21,0,0" VerticalAlignment="Top"/>
         <Label x:Name="NTPTimeLbl" Content="NTP Time:" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,47,0,0" VerticalAlignment="Top"/>
         <Label x:Name="SystemTime" Content="SystemTime" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="88,21,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="NtpTime" Content="NTPTime" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="88,47,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="NtpTime" Content="NtpTime" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="88,47,0,0" VerticalAlignment="Top"/>
         <Label x:Name="DiffLbl" Content="Difference:" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="166,34,0,0" VerticalAlignment="Top"/>
         <Label x:Name="Diff" Content="Difference" HorizontalContentAlignment="Center" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="233,34,0,0" VerticalAlignment="Top"/>
         <Button x:Name="RefreshBtn" Grid.ColumnSpan="2" Click="RefreshBtn_Click" Content="NTP Refresh" HorizontalAlignment="Left" Margin="218,14,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="20"/>
-        <ComboBox x:Name="TZcomboBox" SelectedIndex="0" SelectionChanged="TZcomboBox_SelectionChanged" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="55,76.333,0,0" VerticalAlignment="Top" Width="135" Grid.Row="1">
-            <ComboBoxItem>
-                <TextBlock >UTC</TextBlock>
-            </ComboBoxItem>
-            <ComboBoxItem>
-                <TextBlock>Moscow time zone</TextBlock>
-            </ComboBoxItem>
-            <ComboBoxItem>
-                <TextBlock>E. Europe time zone</TextBlock>
-            </ComboBoxItem>
+        <ComboBox x:Name="TZcomboBox" SelectedIndex="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="55,76.333,0,0" VerticalAlignment="Top" Width="135" Grid.Row="1">
+            <ComboBoxItem Content="GMT Standard Time"/>
+            <ComboBoxItem Content="Russian Standard Time"/>
+            <ComboBoxItem Content="E. Europe Standard Time"/>
         </ComboBox>
     </Grid>
 </Window>
